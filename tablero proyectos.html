@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INTA | Relevamiento de Tipos de Proyecto por Centro</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            inta: {
+              blue: '#005A9C',
+              dark: '#003A66',
+              green: '#68A51D',
+              lightGreen: '#78BE20',
+              cyan: '#009EE0',
+              lightBlue: '#E8F4FD',
+              bgLight: '#F8FAFC',
+              slateText: '#1E293B',
+              muted: '#64748B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F8FAFC;
+      color: #1E293B;
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-inta-lightBlue selection:text-inta-dark">
+
+  <!-- Header Institucional -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <!-- Logo INTA estilizado en SVG vectorial institucional -->
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-inta-blue to-inta-dark flex items-center justify-center shadow-md shadow-inta-blue/20 text-white font-extrabold text-lg tracking-wider">
+            INTA
+          </div>
+          <div>
+            <span class="text-xs font-semibold tracking-wider uppercase text-inta-green block">
+              Sistema de Gestión y Planificación
+            </span>
+            <h1 class="text-lg sm:text-xl font-bold text-inta-dark tracking-tight leading-tight">
+              Relevamiento de Tipos de Proyecto
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-inta-lightBlue text-inta-blue border border-blue-200">
+          <span class="w-2 h-2 rounded-full bg-inta-green mr-2 animate-pulse"></span>
+          Datos Consolidados
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Fila de Indicadores Globales (KPIs) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition-all hover:shadow-md">
+        <div>
+          <p class="text-xs font-medium text-inta-muted uppercase tracking-wider">Total de Proyectos</p>
+          <p class="text-3xl font-extrabold text-inta-dark mt-1" id="kpi-total-proyectos">71</p>
+          <span class="text-xs text-inta-green font-medium flex items-center mt-1">
+            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            100% de la cartera registrada
+          </span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-inta-lightBlue text-inta-blue flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition-all hover:shadow-md">
+        <div>
+          <p class="text-xs font-medium text-inta-muted uppercase tracking-wider">Centros con Proyectos</p>
+          <p class="text-3xl font-extrabold text-inta-dark mt-1" id="kpi-total-centros">12</p>
+          <span class="text-xs text-inta-muted mt-1 block">Regionales e investigación</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-inta-green flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition-all hover:shadow-md">
+        <div>
+          <p class="text-xs font-medium text-inta-muted uppercase tracking-wider">Tipologías Definidas</p>
+          <p class="text-3xl font-extrabold text-inta-dark mt-1">3</p>
+          <span class="text-xs text-inta-cyan font-medium mt-1 block">Tipo I, Tipo II y Tipo III</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-sky-50 text-inta-cyan flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition-all hover:shadow-md">
+        <div>
+          <p class="text-xs font-medium text-inta-muted uppercase tracking-wider">Tipo Predominante</p>
+          <p class="text-2xl font-extrabold text-inta-blue mt-1">Tipo II</p>
+          <span class="text-xs text-inta-muted font-medium mt-1 block">36 proyectos (50.7%)</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-inta-blue flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Barra de Control y Selector interactivo de Tipos de Proyecto -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold text-inta-dark flex items-center">
+            <span>Tipos de Proyecto</span>
+            <span class="ml-2 text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Haga clic en una tarjeta para filtrar los centros</span>
+          </h2>
+          <p class="text-sm text-inta-muted">Seleccione un tipo para ver en detalle los centros que lo integran.</p>
+        </div>
+        
+        <!-- Botón para resetear filtro -->
+        <button id="btn-show-all" onclick="selectTipo('all')" class="inline-flex items-center px-4 py-2 text-xs font-semibold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm self-start sm:self-auto">
+          <svg class="w-3.5 h-3.5 mr-1.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+          Mostrar Todos los Tipos
+        </button>
+      </div>
+
+      <!-- Tarjetas interactivas de Tipos de Proyecto -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="tipo-cards-container">
+        <!-- Generado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- Contenido Detallado: Lista de Centros del Tipo Seleccionado o Matriz Comparativa -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- Encabezado de la Sección de Detalle -->
+      <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span id="active-badge" class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide bg-inta-lightBlue text-inta-blue">
+              Todos los proyectos
+            </span>
+            <span class="text-xs text-slate-400">•</span>
+            <span id="filtered-stats" class="text-xs font-medium text-slate-500">71 proyectos distribuidos</span>
+          </div>
+          <h3 id="detail-title" class="text-xl font-extrabold text-inta-dark mt-1">
+            Distribución por Centro
+          </h3>
+        </div>
+
+        <!-- Buscador y selector de vista -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <!-- Input de búsqueda por nombre de centro -->
+          <div class="relative min-w-[240px]">
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Buscar centro..." 
+              oninput="handleSearch(this.value)"
+              class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-inta-blue/30 focus:border-inta-blue transition"
+            >
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <button id="clear-search" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <!-- Selector de vista (Lista con Barras vs Matriz General) -->
+          <div class="flex p-1 bg-slate-100 rounded-xl border border-slate-200/80">
+            <button id="view-bars-btn" onclick="setViewMode('bars')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-inta-blue shadow-sm transition">
+              Desglose Gráfico
+            </button>
+            <button id="view-matrix-btn" onclick="setViewMode('matrix')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:text-slate-900 transition">
+              Matriz Comparativa
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista 1: Barras y Lista Detallada de Centros -->
+      <div id="view-bars-container" class="p-5 sm:p-6 space-y-4">
+        <!-- Render dinámico de centros -->
+        <div id="centers-list" class="space-y-3">
+          <!-- Items generados dinámicamente -->
+        </div>
+
+        <div id="empty-state" class="hidden py-12 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h4 class="text-sm font-semibold text-slate-700">No se encontraron centros coincidentes</h4>
+          <p class="text-xs text-slate-500 mt-1">Pruebe ajustando el término de búsqueda o seleccionando otro tipo de proyecto.</p>
+        </div>
+      </div>
+
+      <!-- Vista 2: Matriz Comparativa Completa -->
+      <div id="view-matrix-container" class="hidden overflow-x-auto custom-scroll p-4 sm:p-6">
+        <div class="rounded-xl border border-slate-200 overflow-hidden">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Centro / Unidad</th>
+                <th class="py-3 px-4 text-center">Tipo I (Desarrollo)</th>
+                <th class="py-3 px-4 text-center">Tipo II (Validación)</th>
+                <th class="py-3 px-4 text-center">Tipo III (Escalamiento)</th>
+                <th class="py-3 px-4 text-center bg-blue-50/50 text-inta-dark">Total Proyectos</th>
+                <th class="py-3 px-4 text-right">% Cartera</th>
+              </tr>
+            </thead>
+            <tbody id="matrix-tbody" class="divide-y divide-slate-100 bg-white">
+              <!-- Filas de la matriz generadas dinámicamente -->
+            </tbody>
+            <tfoot class="bg-slate-100/90 font-bold text-slate-800 border-t-2 border-slate-300">
+              <tr>
+                <td class="py-3 px-4">TOTAL GENERAL</td>
+                <td class="py-3 px-4 text-center text-inta-blue font-extrabold" id="total-col-1">24</td>
+                <td class="py-3 px-4 text-center text-inta-green font-extrabold" id="total-col-2">36</td>
+                <td class="py-3 px-4 text-center text-inta-cyan font-extrabold" id="total-col-3">11</td>
+                <td class="py-3 px-4 text-center bg-blue-100/60 text-inta-dark font-black text-sm">71</td>
+                <td class="py-3 px-4 text-right">100.0%</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resumen analítico y notas institucionales -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm md:col-span-2">
+        <h4 class="text-sm font-bold text-inta-dark flex items-center mb-3">
+          <span class="w-2.5 h-2.5 rounded-full bg-inta-green mr-2"></span>
+          Lectura Ejecutiva de la Cartera
+        </h4>
+        <div class="text-xs text-slate-600 space-y-2.5 leading-relaxed">
+          <p>
+            • <strong>Tipo II (Experimentación, adaptación y validación)</strong> concentra la mitad exacta del esfuerzo institucional (<span class="font-semibold text-inta-green">50.7%</span>, 36 proyectos), con fuerte anclaje en los Centros Regionales (destacándose Salta-Jujuy con 8 proyectos, Chaco-Formosa con 6, Corrientes y Misiones con 5 cada uno).
+          </p>
+          <p>
+            • <strong>Tipo I (Desarrollo de conocimientos y tecnologías)</strong> representa un tercio (<span class="font-semibold text-inta-blue">33.8%</span>, 24 proyectos), traccionado principalmente por centros de investigación específicos como el <strong>CICVYA (7)</strong> y el <strong>CIA (5)</strong>.
+          </p>
+          <p>
+            • <strong>Tipo III (Adopción y escalamiento)</strong> reúne el <span class="font-semibold text-inta-cyan">15.5%</span> (11 proyectos), liderado por el Centro Regional Patagonia Sur con 4 iniciativas de escalamiento territorial.
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-inta-dark to-inta-blue text-white p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-300">Guía de Navegación</span>
+          <h5 class="text-base font-bold mt-1 text-white">Interactividad del Tablero</h5>
+          <p class="text-xs text-blue-100 mt-2 leading-normal">
+            Haga clic sobre cualquiera de las 3 tarjetas superiores para filtrar instantáneamente qué centros ejecutan cada tipología. Puede alternar a la "Matriz Comparativa" para ver el cuadro completo simultáneo.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-white/20 mt-4 flex items-center justify-between text-[11px] text-blue-200">
+          <span>Fuente: Relevamiento interno INTA</span>
+          <span>Actualizado 2026</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer con estilo INTA -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-inta-muted gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-inta-blue">INTA</span>
+        <span>•</span>
+        <span>Instituto Nacional de Tecnología Agropecuaria</span>
+      </div>
+      <p class="text-slate-400 text-center sm:text-right">
+        Tablero Analítico Institucional • Tipos de Proyecto por Centro
+      </p>
+    </div>
+  </footer>
+
+  <!-- Lógica y Datos del Dashboard -->
+  <script>
+    // Estructura de datos normalizada extraída del relevamiento
+    const tiposData = [
+      {
+        id: 'tipo-1',
+        numero: 'Tipo I',
+        titulo: 'Desarrollo de conocimientos y tecnologías',
+        descripcion: 'Investigación orientada a la generación de nuevo conocimiento, paquetes tecnológicos e innovación.',
+        colorKey: 'blue',
+        accentColor: '#005A9C',
+        badgeBg: 'bg-blue-50',
+        badgeText: 'text-inta-blue',
+        borderActive: 'border-inta-blue ring-2 ring-inta-blue/20 bg-blue-50/20',
+        centros: [
+          { nombre: 'Centro de Investigación en Ciencias Veterinarias y Agronómicas (CICVYA)', siglas: 'CICVYA', cantidad: 7 },
+          { nombre: 'Centro de Investigación de Agroindustria (CIA)', siglas: 'CIA', cantidad: 5 },
+          { nombre: 'Centro de Investigaciones Agropecuarias (CIAP)', siglas: 'CIAP', cantidad: 3 },
+          { nombre: 'Centro Regional Catamarca - La Rioja', siglas: 'CR Catamarca-La Rioja', cantidad: 2 },
+          { nombre: 'Centro Regional Chaco - Formosa', siglas: 'CR Chaco-Formosa', cantidad: 1 },
+          { nombre: 'Centro Regional Corrientes', siglas: 'CR Corrientes', cantidad: 1 },
+          { nombre: 'Centro Regional La Pampa - San Luis', siglas: 'CR La Pampa-San Luis', cantidad: 1 },
+          { nombre: 'Centro Regional Misiones', siglas: 'CR Misiones', cantidad: 1 },
+          { nombre: 'Centro Regional Patagonia Sur', siglas: 'CR Patagonia Sur', cantidad: 1 },
+          { nombre: 'Centro Regional Salta Jujuy', siglas: 'CR Salta Jujuy', cantidad: 1 },
+          { nombre: 'Centro de Investigación y Desarrollo Tecnológico para la Agricultura Familiar (CIPAF)', siglas: 'CIPAF', cantidad: 1 }
+        ]
+      },
+      {
+        id: 'tipo-2',
+        numero: 'Tipo II',
+        titulo: 'Experimentación, adaptación y validación',
+        descripcion: 'Ajuste empírico, validación a campo y adaptación de tecnologías a realidades agroecológicas.',
+        colorKey: 'green',
+        accentColor: '#68A51D',
+        badgeBg: 'bg-emerald-50',
+        badgeText: 'text-inta-green',
+        borderActive: 'border-inta-green ring-2 ring-inta-green/20 bg-emerald-50/20',
+        centros: [
+          { nombre: 'Centro Regional Salta Jujuy', siglas: 'CR Salta Jujuy', cantidad: 8 },
+          { nombre: 'Centro Regional Chaco - Formosa', siglas: 'CR Chaco-Formosa', cantidad: 6 },
+          { nombre: 'Centro Regional Corrientes', siglas: 'CR Corrientes', cantidad: 5 },
+          { nombre: 'Centro Regional Misiones', siglas: 'CR Misiones', cantidad: 5 },
+          { nombre: 'Centro Regional Patagonia Sur', siglas: 'CR Patagonia Sur', cantidad: 3 },
+          { nombre: 'Centro Regional Catamarca - La Rioja', siglas: 'CR Catamarca-La Rioja', cantidad: 2 },
+          { nombre: 'Centro Regional La Pampa - San Luis', siglas: 'CR La Pampa-San Luis', cantidad: 2 },
+          { nombre: 'Centro Regional Tucumán - Santiago del Estero', siglas: 'CR Tucumán-SE', cantidad: 2 },
+          { nombre: 'Centro de Investigación en Ciencias Veterinarias y Agronómicas (CICVYA)', siglas: 'CICVYA', cantidad: 2 },
+          { nombre: 'Centro de Investigación y Desarrollo Tecnológico para la Agricultura Familiar (CIPAF)', siglas: 'CIPAF', cantidad: 1 }
+        ]
+      },
+      {
+        id: 'tipo-3',
+        numero: 'Tipo III',
+        titulo: 'Adopción y escalamiento',
+        descripcion: 'Transferencia territorial, articulación con productores y masificación de resultados.',
+        colorKey: 'cyan',
+        accentColor: '#009EE0',
+        badgeBg: 'bg-sky-50',
+        badgeText: 'text-inta-cyan',
+        borderActive: 'border-inta-cyan ring-2 ring-inta-cyan/20 bg-sky-50/20',
+        centros: [
+          { nombre: 'Centro Regional Patagonia Sur', siglas: 'CR Patagonia Sur', cantidad: 4 },
+          { nombre: 'Centro Regional Catamarca - La Rioja', siglas: 'CR Catamarca-La Rioja', cantidad: 2 },
+          { nombre: 'Centro Regional Chaco - Formosa', siglas: 'CR Chaco-Formosa', cantidad: 1 },
+          { nombre: 'Centro Regional Corrientes', siglas: 'CR Corrientes', cantidad: 1 },
+          { nombre: 'Centro Regional La Pampa - San Luis', siglas: 'CR La Pampa-San Luis', cantidad: 1 },
+          { nombre: 'Centro de Investigación en Ciencias Veterinarias y Agronómicas (CICVYA)', siglas: 'CICVYA', cantidad: 1 },
+          { nombre: 'Centro de Investigación y Desarrollo Tecnológico para la Agricultura Familiar (CIPAF)', siglas: 'CIPAF', cantidad: 1 }
+        ]
+      }
+    ];
+
+    // Calcular totales
+    tiposData.forEach(t => {
+      t.totalProyectos = t.centros.reduce((acc, c) => acc + c.cantidad, 0);
+    });
+
+    const TOTAL_GLOBAL = tiposData.reduce((acc, t) => acc + t.totalProyectos, 0); // 71
+
+    // Lista maestra consolidada de todos los 12 centros
+    const todosLosCentros = [
+      "Centro de Investigación en Ciencias Veterinarias y Agronómicas (CICVYA)",
+      "Centro de Investigación de Agroindustria (CIA)",
+      "Centro de Investigaciones Agropecuarias (CIAP)",
+      "Centro Regional Catamarca - La Rioja",
+      "Centro Regional Chaco - Formosa",
+      "Centro Regional Corrientes",
+      "Centro Regional La Pampa - San Luis",
+      "Centro Regional Misiones",
+      "Centro Regional Patagonia Sur",
+      "Centro Regional Salta Jujuy",
+      "Centro de Investigación y Desarrollo Tecnológico para la Agricultura Familiar (CIPAF)",
+      "Centro Regional Tucumán - Santiago del Estero"
+    ];
+
+    // Estado de la interfaz
+    let activeFilter = 'all'; // 'all' | 'tipo-1' | 'tipo-2' | 'tipo-3'
+    let currentSearch = '';
+    let currentViewMode = 'bars'; // 'bars' | 'matrix'
+
+    // Inicialización del Dashboard
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTipoCards();
+      renderCentersList();
+      renderMatrix();
+    });
+
+    // Render de las 3 tarjetas de tipos de proyecto
+    function renderTipoCards() {
+      const container = document.getElementById('tipo-cards-container');
+      container.innerHTML = '';
+
+      tiposData.forEach(tipo => {
+        const percentage = ((tipo.totalProyectos / TOTAL_GLOBAL) * 100).toFixed(1);
+        const isActive = activeFilter === tipo.id;
+        
+        const card = document.createElement('div');
+        card.id = `card-${tipo.id}`;
+        card.className = `cursor-pointer transition-all duration-200 bg-white rounded-2xl p-5 border ${
+          isActive 
+            ? tipo.borderActive + ' shadow-md scale-[1.01]' 
+            : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
+        } relative flex flex-col justify-between`;
+
+        card.onclick = () => selectTipo(tipo.id);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${tipo.badgeBg} ${tipo.badgeText}">
+                ${tipo.numero}
+              </span>
+              <span class="text-xs font-bold text-slate-400">
+                ${tipo.centros.length} centros
+              </span>
+            </div>
+            
+            <h3 class="text-base font-bold text-inta-dark leading-snug group-hover:text-inta-blue">
+              ${tipo.titulo}
+            </h3>
+            
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+              ${tipo.descripcion}
+            </p>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-slate-100 flex items-end justify-between">
+            <div>
+              <span class="text-2xl font-black text-inta-dark">${tipo.totalProyectos}</span>
+              <span class="text-xs text-slate-400 font-medium ml-1">proyectos</span>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-bold ${tipo.badgeText}">${percentage}%</span>
+              <p class="text-[10px] text-slate-400 uppercase tracking-wider">del total</p>
+            </div>
+          </div>
+          
+          ${isActive ? `
+            <div class="absolute -top-2.5 right-4 bg-inta-dark text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+              FILTRO ACTIVO
+            </div>
+          ` : ''}
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // Manejador de selección de tipo
+    function selectTipo(tipoId) {
+      if (activeFilter === tipoId && tipoId !== 'all') {
+        // Toggle: si ya estaba seleccionado, volver a 'all'
+        activeFilter = 'all';
+      } else {
+        activeFilter = tipoId;
+      }
+
+      // Actualizar botón "Mostrar Todos"
+      const btnShowAll = document.getElementById('btn-show-all');
+      if (activeFilter === 'all') {
+        btnShowAll.className = "inline-flex items-center px-4 py-2 text-xs font-semibold rounded-xl bg-inta-blue text-white shadow-sm self-start sm:self-auto transition";
+      } else {
+        btnShowAll.className = "inline-flex items-center px-4 py-2 text-xs font-semibold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm self-start sm:self-auto";
+      }
+
+      renderTipoCards();
+      renderCentersList();
+    }
+
+    // Render de la lista de centros según el filtro seleccionado
+    function renderCentersList() {
+      const container = document.getElementById('centers-list');
+      const emptyState = document.getElementById('empty-state');
+      const detailTitle = document.getElementById('detail-title');
+      const activeBadge = document.getElementById('active-badge');
+      const filteredStats = document.getElementById('filtered-stats');
+
+      container.innerHTML = '';
+
+      let itemsToRender = [];
+      let maxVal = 1;
+      let contextColor = '#005A9C';
+
+      if (activeFilter === 'all') {
+        detailTitle.textContent = 'Distribución Consolidada por Centro (Todos los Tipos)';
+        activeBadge.textContent = 'Todos los tipos';
+        activeBadge.className = 'px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide bg-slate-100 text-slate-700';
+
+        // Consolidar todos los centros con sus sumas totales y desglose
+        const consolidatedMap = {};
+        todosLosCentros.forEach(cNombre => {
+          consolidatedMap[cNombre] = {
+            nombre: cNombre,
+            total: 0,
+            t1: 0,
+            t2: 0,
+            t3: 0
+          };
+        });
+
+        tiposData[0].centros.forEach(c => { if(consolidatedMap[c.nombre]) { consolidatedMap[c.nombre].t1 = c.cantidad; consolidatedMap[c.nombre].total += c.cantidad; }});
+        tiposData[1].centros.forEach(c => { if(consolidatedMap[c.nombre]) { consolidatedMap[c.nombre].t2 = c.cantidad; consolidatedMap[c.nombre].total += c.cantidad; }});
+        tiposData[2].centros.forEach(c => { if(consolidatedMap[c.nombre]) { consolidatedMap[c.nombre].t3 = c.cantidad; consolidatedMap[c.nombre].total += c.cantidad; }});
+
+        itemsToRender = Object.values(consolidatedMap).filter(item => item.total > 0);
+        itemsToRender.sort((a, b) => b.total - a.total);
+        maxVal = itemsToRender[0] ? itemsToRender[0].total : 1;
+        filteredStats.textContent = `${itemsToRender.length} centros con proyectos (${TOTAL_GLOBAL} proyectos en total)`;
+      } else {
+        const selectedObj = tiposData.find(t => t.id === activeFilter);
+        detailTitle.textContent = `Centros participantes en: ${selectedObj.numero} - ${selectedObj.titulo}`;
+        activeBadge.textContent = selectedObj.numero;
+        activeBadge.className = `px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide ${selectedObj.badgeBg} ${selectedObj.badgeText}`;
+        contextColor = selectedObj.accentColor;
+
+        itemsToRender = selectedObj.centros.map(c => ({
+          nombre: c.nombre,
+          total: c.cantidad,
+          siglas: c.siglas
+        }));
+        itemsToRender.sort((a, b) => b.total - a.total);
+        maxVal = itemsToRender[0] ? itemsToRender[0].total : 1;
+        filteredStats.textContent = `${itemsToRender.length} centros vinculados (${selectedObj.totalProyectos} proyectos)`;
+      }
+
+      // Aplicar búsqueda
+      if (currentSearch.trim() !== '') {
+        const query = currentSearch.toLowerCase();
+        itemsToRender = itemsToRender.filter(item => item.nombre.toLowerCase().includes(query));
+      }
+
+      if (itemsToRender.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      // Renderizar items con barras visuales
+      itemsToRender.forEach(item => {
+        const percentageOfMax = Math.round((item.total / maxVal) * 100);
+        const percentageOfCategory = activeFilter === 'all' 
+          ? ((item.total / TOTAL_GLOBAL) * 100).toFixed(1)
+          : ((item.total / tiposData.find(t => t.id === activeFilter).totalProyectos) * 100).toFixed(1);
+
+        const row = document.createElement('div');
+        row.className = "p-4 rounded-xl border border-slate-100 hover:border-slate-200 bg-white transition hover:bg-slate-50/70";
+
+        let breakdownBadges = '';
+        if (activeFilter === 'all') {
+          breakdownBadges = `
+            <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+              ${item.t1 > 0 ? `<span class="inline-flex items-center text-[10px] px-2 py-0.5 rounded bg-blue-50 text-inta-blue font-semibold">Tipo I: ${item.t1}</span>` : ''}
+              ${item.t2 > 0 ? `<span class="inline-flex items-center text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-inta-green font-semibold">Tipo II: ${item.t2}</span>` : ''}
+              ${item.t3 > 0 ? `<span class="inline-flex items-center text-[10px] px-2 py-0.5 rounded bg-sky-50 text-inta-cyan font-semibold">Tipo III: ${item.t3}</span>` : ''}
+            </div>
+          `;
+        }
+
+        row.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold text-inta-dark">
+                ${item.nombre}
+              </h4>
+              ${breakdownBadges}
+            </div>
+            <div class="flex items-baseline space-x-2 text-right self-end sm:self-center">
+              <span class="text-lg font-black text-inta-dark">${item.total}</span>
+              <span class="text-[11px] text-slate-500 font-medium">proy. (${percentageOfCategory}%)</span>
+            </div>
+          </div>
+          
+          <!-- Barra de progreso personalizada -->
+          <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
+            <div 
+              class="h-full rounded-full transition-all duration-500" 
+              style="width: ${percentageOfMax}%; background-color: ${contextColor};"
+            ></div>
+          </div>
+        `;
+
+        container.appendChild(row);
+      });
+    }
+
+    // Render de la Matriz Comparativa
+    function renderMatrix() {
+      const tbody = document.getElementById('matrix-tbody');
+      tbody.innerHTML = '';
+
+      // Crear mapa completo para cada uno de los 12 centros
+      const centrosMap = {};
+      todosLosCentros.forEach(c => {
+        centrosMap[c] = { t1: 0, t2: 0, t3: 0, total: 0 };
+      });
+
+      tiposData[0].centros.forEach(c => { if(centrosMap[c.nombre]) centrosMap[c.nombre].t1 = c.cantidad; });
+      tiposData[1].centros.forEach(c => { if(centrosMap[c.nombre]) centrosMap[c.nombre].t2 = c.cantidad; });
+      tiposData[2].centros.forEach(c => { if(centrosMap[c.nombre]) centrosMap[c.nombre].t3 = c.cantidad; });
+
+      todosLosCentros.forEach(c => {
+        centrosMap[c].total = centrosMap[c].t1 + centrosMap[c].t2 + centrosMap[c].t3;
+      });
+
+      // Ordenar por total descendente
+      const centrosOrdenados = [...todosLosCentros].sort((a, b) => centrosMap[b].total - centrosMap[a].total);
+
+      centrosOrdenados.forEach((cNombre, index) => {
+        const data = centrosMap[cNombre];
+        const pct = ((data.total / TOTAL_GLOBAL) * 100).toFixed(1);
+
+        const tr = document.createElement('tr');
+        tr.className = index % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/40 hover:bg-slate-50';
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-semibold text-slate-800">
+            ${cNombre}
+          </td>
+          <td class="py-3 px-4 text-center ${data.t1 > 0 ? 'font-bold text-inta-blue' : 'text-slate-300'}">
+            ${data.t1 > 0 ? data.t1 : '—'}
+          </td>
+          <td class="py-3 px-4 text-center ${data.t2 > 0 ? 'font-bold text-inta-green' : 'text-slate-300'}">
+            ${data.t2 > 0 ? data.t2 : '—'}
+          </td>
+          <td class="py-3 px-4 text-center ${data.t3 > 0 ? 'font-bold text-inta-cyan' : 'text-slate-300'}">
+            ${data.t3 > 0 ? data.t3 : '—'}
+          </td>
+          <td class="py-3 px-4 text-center font-black text-inta-dark bg-blue-50/30">
+            ${data.total}
+          </td>
+          <td class="py-3 px-4 text-right text-slate-500 font-medium">
+            ${pct}%
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Manejador de búsqueda
+    function handleSearch(val) {
+      currentSearch = val;
+      const clearBtn = document.getElementById('clear-search');
+      if (val.trim() !== '') {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderCentersList();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('search-input');
+      input.value = '';
+      currentSearch = '';
+      document.getElementById('clear-search').classList.add('hidden');
+      renderCentersList();
+    }
+
+    // Alternar entre Vista de Barras y Matriz Comparativa
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const barsContainer = document.getElementById('view-bars-container');
+      const matrixContainer = document.getElementById('view-matrix-container');
+      const barsBtn = document.getElementById('view-bars-btn');
+      const matrixBtn = document.getElementById('view-matrix-btn');
+
+      if (mode === 'bars') {
+        barsContainer.classList.remove('hidden');
+        matrixContainer.classList.add('hidden');
+        barsBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-inta-blue shadow-sm transition";
+        matrixBtn.className = "px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:text-slate-900 transition";
+      } else {
+        barsContainer.classList.add('hidden');
+        matrixContainer.classList.remove('hidden');
+        matrixBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-inta-blue shadow-sm transition";
+        barsBtn.className = "px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:text-slate-900 transition";
+      }
+    }
+  </script>
+</body>
+</html>
