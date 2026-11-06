@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INTA | Tablero de Proyectos y Control de Cargas por Centro</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- SheetJS para lectura offline/archivo local -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            inta: {
+              blue: '#005A9C',
+              dark: '#003A66',
+              green: '#68A51D',
+              lightGreen: '#78BE20',
+              cyan: '#009EE0',
+              lightBlue: '#E8F4FD',
+              bgLight: '#F8FAFC',
+              slateText: '#1E293B',
+              muted: '#64748B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F8FAFC;
+      color: #1E293B;
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-inta-lightBlue selection:text-inta-dark">
+
+  <!-- Modal / Notificación flotante (reemplazo de alert) -->
+  <div id="toast-notification" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="flex items-center px-4 py-3 rounded-xl shadow-xl border bg-white text-slate-800 text-xs font-semibold" id="toast-content">
+      <span id="toast-icon" class="mr-2.5 text-base">ℹ️</span>
+      <span id="toast-message">Mensaje informativo</span>
+    </div>
+  </div>
+
+  <!-- Header Institucional INTA -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-inta-blue to-inta-dark flex items-center justify-center shadow-md shadow-inta-blue/20 text-white font-extrabold text-lg tracking-wider flex-shrink-0">
+          INTA
+        </div>
+        <div>
+          <span class="text-[11px] font-bold tracking-wider uppercase text-inta-green block">
+            Dirección Nacional de Asistencias e I+D
+          </span>
+          <h1 class="text-base sm:text-xl font-extrabold text-inta-dark tracking-tight leading-tight">
+            Monitoreo de Proyectos y Cupos de Carga
+          </h1>
+        </div>
+      </div>
+
+      <!-- Acciones de Sincronización y Carga -->
+      <div class="flex items-center space-x-2">
+        <button onclick="syncGoogleSheets()" id="btn-sync" class="inline-flex items-center px-3 py-2 rounded-xl text-xs font-semibold bg-inta-lightBlue text-inta-blue hover:bg-blue-100 border border-blue-200 transition shadow-sm" title="Reconsultar la hoja de Google Sheets en vivo">
+          <svg id="sync-spinner" class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span class="hidden sm:inline">Sincronizar Sheets</span>
+          <span class="sm:hidden">Sincronizar</span>
+        </button>
+
+        <label class="cursor-pointer inline-flex items-center px-3 py-2 rounded-xl text-xs font-semibold bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition shadow-sm" title="Importar archivo Excel descargado localmente">
+          <svg class="w-3.5 h-3.5 mr-1.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <span class="hidden sm:inline">Subir .xlsx</span>
+          <span class="sm:hidden">Subir</span>
+          <input type="file" id="file-upload" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFileUpload(event)">
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner de Estado de Conexión -->
+  <div id="status-bar" class="bg-blue-50/70 border-b border-blue-100 text-xs px-4 py-2">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between text-inta-dark font-medium gap-1">
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-inta-green animate-pulse"></span>
+        <span id="data-source-label">Fuente: Sincronización con Google Sheet de Proyectos y Cupos de Carga</span>
+      </div>
+      <div class="text-slate-500 text-[11px]" id="last-updated-label">
+        Actualizado: Hoy
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-7">
+    
+    <!-- SECCIÓN 1: AUDITORÍA DE CUPOS Y SEMÁFORO DE NOTIFICACIONES -->
+    <section class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-1.5">
+            Módulo de Gestión y Notificaciones
+          </div>
+          <h2 class="text-lg sm:text-xl font-black text-inta-dark tracking-tight">
+            Semáforo de Cumplimiento de Cupos por Centro
+          </h2>
+          <p class="text-xs text-inta-muted">
+            Monitoreo en tiempo real del cupo máximo asignado vs. proyectos cargados para emisión de avisos y recordatorios.
+          </p>
+        </div>
+
+        <!-- Botones de Acción rápida para Notificaciones -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="copyNotificationText('faltantes')" class="inline-flex items-center px-3.5 py-2 text-xs font-bold rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition shadow-sm">
+            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+            Copiar Aviso: Faltan Cargar
+          </button>
+          <button onclick="copyNotificationText('excedidos')" class="inline-flex items-center px-3.5 py-2 text-xs font-bold rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 transition shadow-sm">
+            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            Copiar Aviso: Superaron Cupo
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjetas de Resumen de Semáforo -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <!-- Tarjeta Cupos Faltantes -->
+        <div onclick="filterByAuditStatus('faltan')" class="cursor-pointer group p-4 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-100/60 transition shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">Les Falta Cargar</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+          </div>
+          <p class="text-2xl sm:text-3xl font-black text-amber-900 mt-2" id="kpi-faltan-centros">0</p>
+          <p class="text-[11px] text-amber-700 font-medium mt-0.5" id="kpi-faltan-proy">0 proyectos por completar</p>
+        </div>
+
+        <!-- Tarjeta Cupos Excedidos -->
+        <div onclick="filterByAuditStatus('superaron')" class="cursor-pointer group p-4 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100/60 transition shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-rose-800 uppercase tracking-wider">Superaron Cupo</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+          </div>
+          <p class="text-2xl sm:text-3xl font-black text-rose-900 mt-2" id="kpi-superaron-centros">0</p>
+          <p class="text-[11px] text-rose-700 font-medium mt-0.5" id="kpi-superaron-proy">0 proyectos en exceso</p>
+        </div>
+
+        <!-- Tarjeta Cupos Exactos -->
+        <div onclick="filterByAuditStatus('exactos')" class="cursor-pointer group p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/60 transition shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Cupo Completo</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+          </div>
+          <p class="text-2xl sm:text-3xl font-black text-emerald-900 mt-2" id="kpi-exactos-centros">0</p>
+          <p class="text-[11px] text-emerald-700 font-medium mt-0.5">Carga 100% precisa</p>
+        </div>
+
+        <!-- Tarjeta Total Centros Monitoreados -->
+        <div onclick="filterByAuditStatus('all')" class="cursor-pointer group p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Centros en Regla</span>
+            <span class="text-slate-400 text-xs">Total</span>
+          </div>
+          <p class="text-2xl sm:text-3xl font-black text-inta-dark mt-2" id="kpi-total-monitoreados">0</p>
+          <p class="text-[11px] text-slate-500 font-medium mt-0.5" id="kpi-balance-total">Cargados vs Cupos</p>
+        </div>
+      </div>
+
+      <!-- Barra de Filtros Rápidos de Auditoría -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100 flex-wrap gap-2 text-xs">
+        <div class="flex items-center gap-1.5 flex-wrap" id="audit-filter-pills">
+          <button onclick="filterByAuditStatus('all')" id="pill-audit-all" class="px-3 py-1.5 rounded-lg font-bold bg-inta-dark text-white transition">
+            Todos los Centros
+          </button>
+          <button onclick="filterByAuditStatus('faltan')" id="pill-audit-faltan" class="px-3 py-1.5 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+            ⚠️ Faltan cargar (<span id="count-pill-faltan">0</span>)
+          </button>
+          <button onclick="filterByAuditStatus('superaron')" id="pill-audit-superaron" class="px-3 py-1.5 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+            🚨 Superaron cupo (<span id="count-pill-superaron">0</span>)
+          </button>
+          <button onclick="filterByAuditStatus('exactos')" id="pill-audit-exactos" class="px-3 py-1.5 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">
+            ✅ Cupo justo (<span id="count-pill-exactos">0</span>)
+          </button>
+        </div>
+        <span class="text-[11px] text-slate-400">Clic en un filtro para enfocar la lista inferior</span>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: TIPOS DE PROYECTO (INTERACTIVO AL HACER CLIC) -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h2 class="text-lg font-bold text-inta-dark flex items-center">
+            <span>Tipos de Proyecto</span>
+            <span class="ml-2 text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Haga clic sobre una tipología para aislar sus centros</span>
+          </h2>
+          <p class="text-xs text-inta-muted">Vea el volumen total por tipo y qué centros los registraron.</p>
+        </div>
+        
+        <button id="btn-show-all-tipos" onclick="selectTipo('all')" class="inline-flex items-center px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-inta-blue text-white transition shadow-sm self-start sm:self-auto">
+          <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+          Ver Todos los Tipos
+        </button>
+      </div>
+
+      <!-- Tarjetas de Tipos de Proyecto generadas dinámicamente -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="tipo-cards-container">
+        <!-- Render dinámico -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: DETALLE DE CENTROS, BARRAS DE PROGRESO Y MATRIZ -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- Barra de herramientas superior -->
+      <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span id="active-badge" class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide bg-inta-lightBlue text-inta-blue">
+              Todos los tipos
+            </span>
+            <span class="text-xs text-slate-400">•</span>
+            <span id="filtered-stats" class="text-xs font-medium text-slate-500">Cargando datos...</span>
+          </div>
+          <h3 id="detail-title" class="text-xl font-black text-inta-dark mt-1">
+            Centros y Cumplimiento de Cupo
+          </h3>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <!-- Buscador por texto -->
+          <div class="relative min-w-[240px]">
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Buscar por centro..." 
+              oninput="handleSearch(this.value)"
+              class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-inta-blue/30 focus:border-inta-blue transition"
+            >
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <button id="clear-search" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <!-- Selector de Modo de Vista -->
+          <div class="flex p-1 bg-slate-100 rounded-xl border border-slate-200/80">
+            <button id="view-cards-btn" onclick="setViewMode('cards')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-inta-blue shadow-sm transition">
+              Auditoría y Cupos
+            </button>
+            <button id="view-matrix-btn" onclick="setViewMode('matrix')" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition">
+              Matriz Comparativa
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA 1: TARJETAS CON SEMÁFORO DE CUPO Y BARRAS DE PROGRESO -->
+      <div id="view-cards-container" class="p-5 sm:p-6 space-y-3.5">
+        <div id="centers-list" class="space-y-3.5">
+          <!-- Render dinámico -->
+        </div>
+
+        <div id="empty-state" class="hidden py-12 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h4 class="text-sm font-bold text-slate-700">Sin centros que coincidan con el criterio</h4>
+          <p class="text-xs text-slate-500 mt-1">Pruebe quitando los filtros o cambiando el término de búsqueda.</p>
+        </div>
+      </div>
+
+      <!-- VISTA 2: MATRIZ COMPARATIVA Y TABLA DETALLADA -->
+      <div id="view-matrix-container" class="hidden overflow-x-auto custom-scroll p-4 sm:p-6">
+        <div class="rounded-xl border border-slate-200 overflow-hidden">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Centro / Unidad</th>
+                <th class="py-3 px-4 text-center">Cupo Máximo</th>
+                <th class="py-3 px-4 text-center">Total Cargados</th>
+                <th class="py-3 px-4 text-center">Estado de Carga</th>
+                <th class="py-3 px-4 text-center">Diferencia</th>
+                <th class="py-3 px-4 text-center">Tipo I</th>
+                <th class="py-3 px-4 text-center">Tipo II</th>
+                <th class="py-3 px-4 text-center">Tipo III</th>
+              </tr>
+            </thead>
+            <tbody id="matrix-tbody" class="divide-y divide-slate-100 bg-white">
+              <!-- Filas de matriz -->
+            </tbody>
+            <tfoot class="bg-slate-100 font-bold text-slate-800 border-t-2 border-slate-300">
+              <tr id="matrix-tfoot-row">
+                <!-- Totales generales -->
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal para Notificaciones Preparadas -->
+    <div id="notification-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h4 class="text-base font-bold text-inta-dark" id="modal-title">Listado de Notificación</h4>
+          <button onclick="closeNotificationModal()" class="text-slate-400 hover:text-slate-600 p-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <p class="text-xs text-slate-600" id="modal-desc">
+          Texto listo para copiar y enviar por correo o comunicación oficial a los referentes de los centros:
+        </p>
+        <textarea id="modal-textarea" rows="8" readonly class="w-full p-3 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl focus:outline-none custom-scroll text-slate-800"></textarea>
+        <div class="flex justify-end gap-2 pt-2">
+          <button onclick="closeNotificationModal()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            Cerrar
+          </button>
+          <button onclick="copyModalText()" class="px-4 py-2 text-xs font-bold rounded-xl bg-inta-blue text-white hover:bg-inta-dark transition shadow-sm flex items-center">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+            Copiar al Portapapeles
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer con estilo INTA -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-inta-muted gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-inta-blue">INTA</span>
+        <span>•</span>
+        <span>Instituto Nacional de Tecnología Agropecuaria</span>
+      </div>
+      <p class="text-slate-400 text-center sm:text-right">
+        Sistema de Relevamiento Institucional • Control de Carga y Tipologías de Proyecto
+      </p>
+    </div>
+  </footer>
+
+  <!-- LÓGICA Y SINCRONIZACIÓN -->
+  <script>
+    // ID de la planilla compartida por el usuario
+    const SPREADSHEET_ID = '1rL7g06ODlDvku-kk7ierJlsl_v75WHf09WQCZMJWdOU';
+
+    // Tipologías institucionales de proyectos
+    const TIPOLOGIAS = [
+      { id: 'Tipo I', label: 'Tipo I', desc: 'Desarrollo de conocimientos y tecnologías', color: '#005A9C', bg: 'bg-blue-50', text: 'text-inta-blue', border: 'border-inta-blue ring-2 ring-inta-blue/20 bg-blue-50/20' },
+      { id: 'Tipo II', label: 'Tipo II', desc: 'Experimentación, adaptación y validación', color: '#68A51D', bg: 'bg-emerald-50', text: 'text-inta-green', border: 'border-inta-green ring-2 ring-inta-green/20 bg-emerald-50/20' },
+      { id: 'Tipo III', label: 'Tipo III', desc: 'Adopción y escalamiento', color: '#009EE0', bg: 'bg-sky-50', text: 'text-inta-cyan', border: 'border-inta-cyan ring-2 ring-inta-cyan/20 bg-sky-50/20' }
+    ];
+
+    // Base de datos de reserva / predeterminada (se actualiza automáticamente por Google Sheets o .xlsx subido)
+    let centrosData = [
+      { nombre: 'Centro Regional Salta Jujuy', maximo: 8, t1: 1, t2: 8, t3: 0 },
+      { nombre: 'Centro Regional Chaco - Formosa', maximo: 7, t1: 1, t2: 6, t3: 1 },
+      { nombre: 'Centro de Investigación en Ciencias Veterinarias y Agronómicas (CICVYA)', maximo: 9, t1: 7, t2: 2, t3: 1 },
+      { nombre: 'Centro Regional Corrientes', maximo: 6, t1: 1, t2: 5, t3: 1 },
+      { nombre: 'Centro Regional Misiones', maximo: 6, t1: 1, t2: 5, t3: 0 },
+      { nombre: 'Centro Regional Patagonia Sur', maximo: 7, t1: 1, t2: 3, t3: 4 },
+      { nombre: 'Centro de Investigación de Agroindustria (CIA)', maximo: 5, t1: 5, t2: 0, t3: 0 },
+      { nombre: 'Centro Regional Catamarca - La Rioja', maximo: 6, t1: 2, t2: 2, t3: 2 },
+      { nombre: 'Centro Regional La Pampa - San Luis', maximo: 5, t1: 1, t2: 2, t3: 1 },
+      { nombre: 'Centro de Investigaciones Agropecuarias (CIAP)', maximo: 4, t1: 3, t2: 0, t3: 0 },
+      { nombre: 'Centro Regional Tucumán - Santiago del Estero', maximo: 6, t1: 0, t2: 2, t3: 0 },
+      { nombre: 'Centro de Investigación y Desarrollo Tecnológico para la Agricultura Familiar (CIPAF)', maximo: 3, t1: 1, t2: 1, t3: 1 },
+      { nombre: 'Centro Regional Buenos Aires Norte', maximo: 6, t1: 0, t2: 0, t3: 0 },
+      { nombre: 'Centro Regional Buenos Aires Sur', maximo: 6, t1: 0, t2: 0, t3: 0 },
+      { nombre: 'Centro Regional Córdoba', maximo: 6, t1: 0, t2: 0, t3: 0 },
+      { nombre: 'Centro Regional Entre Ríos', maximo: 6, t1: 0, t2: 0, t3: 0 },
+      { nombre: 'Centro Regional Mendoza - San Juan', maximo: 6, t1: 0, t2: 0, t3: 0 },
+      { nombre: 'Centro Regional Patagonia Norte', maximo: 6, t1: 0, t2: 0, t3: 0 },
+      { nombre: 'Centro Regional Santa Fe', maximo: 6, t1: 0, t2: 0, t3: 0 }
+    ];
+
+    // Variables de estado
+    let activeTipoFilter = 'all'; // 'all' | 'Tipo I' | 'Tipo II' | 'Tipo III'
+    let activeAuditFilter = 'all'; // 'all' | 'faltan' | 'superaron' | 'exactos'
+    let searchQuery = '';
+    let currentViewMode = 'cards'; // 'cards' | 'matrix'
+
+    // Inicializar al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+      calculateMetrics();
+      renderAll();
+      // Intentar sincronización automática en vivo con Google Sheets
+      syncGoogleSheets(true);
+    });
+
+    // Calcular totales y métricas de cada centro
+    function calculateMetrics() {
+      centrosData.forEach(c => {
+        c.totalCargados = (c.t1 || 0) + (c.t2 || 0) + (c.t3 || 0);
+        c.diferencia = c.totalCargados - c.maximo;
+        
+        if (c.totalCargados > c.maximo) {
+          c.estado = 'superaron';
+          c.estadoLabel = 'Superó el máximo';
+          c.estadoColor = 'text-rose-700 bg-rose-50 border-rose-200';
+          c.badgeIcon = '🚨';
+        } else if (c.totalCargados < c.maximo) {
+          c.estado = 'faltan';
+          c.estadoLabel = `Faltan ${c.maximo - c.totalCargados}`;
+          c.estadoColor = 'text-amber-800 bg-amber-50 border-amber-200';
+          c.badgeIcon = '⚠️';
+        } else {
+          c.estado = 'exactos';
+          c.estadoLabel = 'Cupo completo';
+          c.estadoColor = 'text-emerald-800 bg-emerald-50 border-emerald-200';
+          c.badgeIcon = '✅';
+        }
+      });
+    }
+
+    // Renderizar todos los componentes
+    function renderAll() {
+      renderSummaryKPIs();
+      renderTipoCards();
+      renderCentersList();
+      renderMatrix();
+    }
+
+    // Actualizar KPIs de Auditoría de Cupos
+    function renderSummaryKPIs() {
+      const faltanCentros = centrosData.filter(c => c.estado === 'faltan');
+      const superaronCentros = centrosData.filter(c => c.estado === 'superaron');
+      const exactosCentros = centrosData.filter(c => c.estado === 'exactos');
+
+      const totalFaltantes = faltanCentros.reduce((acc, c) => acc + (c.maximo - c.totalCargados), 0);
+      const totalExcedentes = superaronCentros.reduce((acc, c) => acc + (c.totalCargados - c.maximo), 0);
+      const totalCargadosGlobal = centrosData.reduce((acc, c) => acc + c.totalCargados, 0);
+      const totalCuposGlobal = centrosData.reduce((acc, c) => acc + c.maximo, 0);
+
+      document.getElementById('kpi-faltan-centros').textContent = faltanCentros.length;
+      document.getElementById('kpi-faltan-proy').textContent = `${totalFaltantes} proyecto${totalFaltantes !== 1 ? 's' : ''} por cargar`;
+
+      document.getElementById('kpi-superaron-centros').textContent = superaronCentros.length;
+      document.getElementById('kpi-superaron-proy').textContent = `${totalExcedentes} proyecto${totalExcedentes !== 1 ? 's' : ''} excedido${totalExcedentes !== 1 ? 's' : ''}`;
+
+      document.getElementById('kpi-exactos-centros').textContent = exactosCentros.length;
+      document.getElementById('kpi-total-monitoreados').textContent = centrosData.length;
+      document.getElementById('kpi-balance-total').textContent = `${totalCargadosGlobal} cargados de ${totalCuposGlobal} cupos`;
+
+      // Contador en píldoras
+      document.getElementById('count-pill-faltan').textContent = faltanCentros.length;
+      document.getElementById('count-pill-superaron').textContent = superaronCentros.length;
+      document.getElementById('count-pill-exactos').textContent = exactosCentros.length;
+    }
+
+    // Render de las tarjetas de tipo de proyecto
+    function renderTipoCards() {
+      const container = document.getElementById('tipo-cards-container');
+      container.innerHTML = '';
+
+      const totalGlobal = centrosData.reduce((acc, c) => acc + c.totalCargados, 0);
+
+      TIPOLOGIAS.forEach(tipo => {
+        const propKey = tipo.id === 'Tipo I' ? 't1' : tipo.id === 'Tipo II' ? 't2' : 't3';
+        const totalTipo = centrosData.reduce((acc, c) => acc + (c[propKey] || 0), 0);
+        const centrosConEsteTipo = centrosData.filter(c => (c[propKey] || 0) > 0);
+        const porcentaje = totalGlobal > 0 ? ((totalTipo / totalGlobal) * 100).toFixed(1) : 0;
+        const isActive = activeTipoFilter === tipo.id;
+
+        const card = document.createElement('div');
+        card.className = `cursor-pointer transition-all duration-200 bg-white rounded-2xl p-5 border ${
+          isActive 
+            ? tipo.border + ' shadow-md scale-[1.01]' 
+            : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
+        } relative flex flex-col justify-between`;
+
+        card.onclick = () => selectTipo(tipo.id);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${tipo.bg} ${tipo.text}">
+                ${tipo.label}
+              </span>
+              <span class="text-xs font-bold text-slate-400">
+                ${centrosConEsteTipo.length} centros
+              </span>
+            </div>
+            <h3 class="text-sm sm:text-base font-bold text-inta-dark leading-snug">
+              ${tipo.desc}
+            </h3>
+          </div>
+
+          <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-end justify-between">
+            <div>
+              <span class="text-2xl font-black text-inta-dark">${totalTipo}</span>
+              <span class="text-xs text-slate-400 font-medium ml-1">proyectos</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs sm:text-sm font-bold ${tipo.text}">${porcentaje}%</span>
+              <p class="text-[10px] text-slate-400 uppercase tracking-wider">del total</p>
+            </div>
+          </div>
+          
+          ${isActive ? `
+            <div class="absolute -top-2.5 right-4 bg-inta-dark text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+              FILTRANDO
+            </div>
+          ` : ''}
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // Render de Centros (Lista y Barras con Semáforo)
+    function renderCentersList() {
+      const container = document.getElementById('centers-list');
+      const emptyState = document.getElementById('empty-state');
+      const detailTitle = document.getElementById('detail-title');
+      const activeBadge = document.getElementById('active-badge');
+      const filteredStats = document.getElementById('filtered-stats');
+
+      container.innerHTML = '';
+
+      let items = [...centrosData];
+
+      // Filtro por Estado de Auditoría (Cupos)
+      if (activeAuditFilter !== 'all') {
+        items = items.filter(c => c.estado === activeAuditFilter);
+      }
+
+      // Filtro por Tipo de Proyecto seleccionado
+      let currentTipoObj = null;
+      if (activeTipoFilter !== 'all') {
+        currentTipoObj = TIPOLOGIAS.find(t => t.id === activeTipoFilter);
+        const propKey = activeTipoFilter === 'Tipo I' ? 't1' : activeTipoFilter === 'Tipo II' ? 't2' : 't3';
+        items = items.filter(c => (c[propKey] || 0) > 0);
+      }
+
+      // Filtro de Búsqueda por texto
+      if (searchQuery.trim() !== '') {
+        const q = searchQuery.toLowerCase();
+        items = items.filter(c => c.nombre.toLowerCase().includes(q));
+      }
+
+      // Ordenar: primero los centros con proyectos o que necesitan atención
+      items.sort((a, b) => {
+        // Orden de prioridad: superaron > faltan > exactos
+        const priority = { 'superaron': 1, 'faltan': 2, 'exactos': 3 };
+        if (priority[a.estado] !== priority[b.estado]) {
+          return priority[a.estado] - priority[b.estado];
+        }
+        return b.totalCargados - a.totalCargados;
+      });
+
+      // Actualizar Títulos y Badges informativos
+      if (activeTipoFilter === 'all') {
+        detailTitle.textContent = activeAuditFilter === 'all' 
+          ? 'Centros, Cupos Máximos y Proyectos Registrados'
+          : `Centros Filtrados por Estado: ${activeAuditFilter.toUpperCase()}`;
+        activeBadge.textContent = 'Todos los tipos';
+        activeBadge.className = 'px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide bg-slate-100 text-slate-700';
+      } else {
+        detailTitle.textContent = `Centros con proyectos ${currentTipoObj.label} (${currentTipoObj.desc})`;
+        activeBadge.textContent = currentTipoObj.label;
+        activeBadge.className = `px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide ${currentTipoObj.bg} ${currentTipoObj.text}`;
+      }
+
+      filteredStats.textContent = `${items.length} centros mostrados`;
+
+      if (items.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      // Render de cada fila de centro
+      items.forEach(centro => {
+        const pctCupo = centro.maximo > 0 ? Math.min(Math.round((centro.totalCargados / centro.maximo) * 100), 100) : 0;
+        
+        // Color de barra según estado de cupo
+        let barColor = '#68A51D'; // Verde por defecto
+        if (centro.estado === 'superaron') barColor = '#E11D48'; // Rojo
+        if (centro.estado === 'faltan') barColor = '#D97706'; // Ámbar
+
+        const row = document.createElement('div');
+        row.className = "p-4 sm:p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm transition";
+
+        // Badges de desglose de proyectos
+        const breakdownBadges = `
+          <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+            ${centro.t1 > 0 ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-blue-50 text-inta-blue font-bold">Tipo I: ${centro.t1}</span>` : ''}
+            ${centro.t2 > 0 ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-50 text-inta-green font-bold">Tipo II: ${centro.t2}</span>` : ''}
+            ${centro.t3 > 0 ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-sky-50 text-inta-cyan font-bold">Tipo III: ${centro.t3}</span>` : ''}
+          </div>
+        `;
+
+        // Píldora de estado de cupo
+        let statusBadge = '';
+        if (centro.estado === 'superaron') {
+          statusBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            🚨 Superó el cupo por ${centro.diferencia}
+          </span>`;
+        } else if (centro.estado === 'faltan') {
+          statusBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+            ⚠️ Faltan cargar ${centro.maximo - centro.totalCargados}
+          </span>`;
+        } else {
+          statusBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+            ✅ Cupo completo (${centro.maximo}/${centro.maximo})
+          </span>`;
+        }
+
+        row.innerHTML = `
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="text-sm sm:text-base font-bold text-inta-dark">
+                  ${centro.nombre}
+                </h4>
+                ${statusBadge}
+              </div>
+              ${breakdownBadges}
+            </div>
+
+            <!-- Resumen numérico -->
+            <div class="flex items-center justify-between sm:justify-end gap-5 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-100 flex-shrink-0">
+              <div class="text-center sm:text-right">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Cargados</span>
+                <span class="text-lg font-black text-inta-dark">${centro.totalCargados}</span>
+              </div>
+              <div class="text-slate-300 font-light text-lg">/</div>
+              <div class="text-center sm:text-right">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Cupo Máx</span>
+                <span class="text-lg font-black text-slate-700">${centro.maximo}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Progreso de Cupo -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-semibold text-slate-500">
+              <span>Avance de carga respecto al cupo</span>
+              <span>${pctCupo}% (${centro.totalCargados} de ${centro.maximo})</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
+              <div 
+                class="h-full rounded-full transition-all duration-500" 
+                style="width: ${pctCupo}%; background-color: ${barColor};"
+              ></div>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(row);
+      });
+    }
+
+    // Render de la Matriz Comparativa Completa
+    function renderMatrix() {
+      const tbody = document.getElementById('matrix-tbody');
+      tbody.innerHTML = '';
+
+      let items = [...centrosData];
+      if (searchQuery.trim() !== '') {
+        const q = searchQuery.toLowerCase();
+        items = items.filter(c => c.nombre.toLowerCase().includes(q));
+      }
+
+      items.sort((a, b) => b.totalCargados - a.totalCargados);
+
+      let sumMax = 0, sumTot = 0, sumT1 = 0, sumT2 = 0, sumT3 = 0;
+
+      items.forEach((c, index) => {
+        sumMax += c.maximo;
+        sumTot += c.totalCargados;
+        sumT1 += (c.t1 || 0);
+        sumT2 += (c.t2 || 0);
+        sumT3 += (c.t3 || 0);
+
+        let badgeClass = 'text-emerald-700 bg-emerald-50 border-emerald-200';
+        let badgeText = 'Completo';
+        if (c.estado === 'superaron') {
+          badgeClass = 'text-rose-700 bg-rose-50 border-rose-200';
+          badgeText = `Excedido (+${c.diferencia})`;
+        } else if (c.estado === 'faltan') {
+          badgeClass = 'text-amber-700 bg-amber-50 border-amber-200';
+          badgeText = `Incompleto (-${c.maximo - c.totalCargados})`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = index % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-50';
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-semibold text-slate-800">
+            ${c.nombre}
+          </td>
+          <td class="py-3 px-4 text-center font-bold text-slate-600">
+            ${c.maximo}
+          </td>
+          <td class="py-3 px-4 text-center font-black text-inta-dark bg-blue-50/30">
+            ${c.totalCargados}
+          </td>
+          <td class="py-3 px-4 text-center">
+            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeClass}">
+              ${badgeText}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-center font-bold ${c.diferencia > 0 ? 'text-rose-600' : c.diferencia < 0 ? 'text-amber-600' : 'text-emerald-600'}">
+            ${c.diferencia > 0 ? `+${c.diferencia}` : c.diferencia === 0 ? '0' : c.diferencia}
+          </td>
+          <td class="py-3 px-4 text-center ${c.t1 > 0 ? 'font-bold text-inta-blue' : 'text-slate-300'}">
+            ${c.t1 > 0 ? c.t1 : '—'}
+          </td>
+          <td class="py-3 px-4 text-center ${c.t2 > 0 ? 'font-bold text-inta-green' : 'text-slate-300'}">
+            ${c.t2 > 0 ? c.t2 : '—'}
+          </td>
+          <td class="py-3 px-4 text-center ${c.t3 > 0 ? 'font-bold text-inta-cyan' : 'text-slate-300'}">
+            ${c.t3 > 0 ? c.t3 : '—'}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      // Pie de tabla con totales
+      const tfootRow = document.getElementById('matrix-tfoot-row');
+      tfootRow.innerHTML = `
+        <td class="py-3 px-4">TOTAL GENERAL</td>
+        <td class="py-3 px-4 text-center text-slate-800 font-extrabold">${sumMax}</td>
+        <td class="py-3 px-4 text-center bg-blue-100/70 text-inta-dark font-black text-sm">${sumTot}</td>
+        <td class="py-3 px-4 text-center text-xs">—</td>
+        <td class="py-3 px-4 text-center font-black ${sumTot > sumMax ? 'text-rose-600' : 'text-amber-600'}">${sumTot - sumMax > 0 ? '+' : ''}${sumTot - sumMax}</td>
+        <td class="py-3 px-4 text-center text-inta-blue font-extrabold">${sumT1}</td>
+        <td class="py-3 px-4 text-center text-inta-green font-extrabold">${sumT2}</td>
+        <td class="py-3 px-4 text-center text-inta-cyan font-extrabold">${sumT3}</td>
+      `;
+    }
+
+    // Filtros de Auditoría
+    function filterByAuditStatus(status) {
+      activeAuditFilter = status;
+
+      // Actualizar estilo visual de las píldoras
+      const pills = ['all', 'faltan', 'superaron', 'exactos'];
+      pills.forEach(p => {
+        const btn = document.getElementById(`pill-audit-${p}`);
+        if (p === status) {
+          btn.className = "px-3 py-1.5 rounded-lg font-bold bg-inta-dark text-white transition shadow-sm";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-lg font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition";
+        }
+      });
+
+      renderCentersList();
+    }
+
+    // Filtro por tipo de proyecto
+    function selectTipo(tipoId) {
+      if (activeTipoFilter === tipoId && tipoId !== 'all') {
+        activeTipoFilter = 'all';
+      } else {
+        activeTipoFilter = tipoId;
+      }
+
+      const btnAll = document.getElementById('btn-show-all-tipos');
+      if (activeTipoFilter === 'all') {
+        btnAll.className = "inline-flex items-center px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-inta-blue text-white transition shadow-sm self-start sm:self-auto";
+      } else {
+        btnAll.className = "inline-flex items-center px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm self-start sm:self-auto";
+      }
+
+      renderTipoCards();
+      renderCentersList();
+    }
+
+    // Buscador
+    function handleSearch(val) {
+      searchQuery = val;
+      const clearBtn = document.getElementById('clear-search');
+      if (val.trim() !== '') {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderCentersList();
+      renderMatrix();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('search-input');
+      input.value = '';
+      searchQuery = '';
+      document.getElementById('clear-search').classList.add('hidden');
+      renderCentersList();
+      renderMatrix();
+    }
+
+    // Cambio de vista (Cards vs Matriz)
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const cardsCont = document.getElementById('view-cards-container');
+      const matrixCont = document.getElementById('view-matrix-container');
+      const cardsBtn = document.getElementById('view-cards-btn');
+      const matrixBtn = document.getElementById('view-matrix-btn');
+
+      if (mode === 'cards') {
+        cardsCont.classList.remove('hidden');
+        matrixCont.classList.add('hidden');
+        cardsBtn.className = "px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-inta-blue shadow-sm transition";
+        matrixBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition";
+      } else {
+        cardsCont.classList.add('hidden');
+        matrixCont.classList.remove('hidden');
+        matrixBtn.className = "px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-inta-blue shadow-sm transition";
+        cardsBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition";
+      }
+    }
+
+    // ==========================================
+    // NOTIFICACIONES PREPARADAS (COPIAR TEXTO)
+    // ==========================================
+    function copyNotificationText(tipo) {
+      const modal = document.getElementById('notification-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalDesc = document.getElementById('modal-desc');
+      const modalTextarea = document.getElementById('modal-textarea');
+
+      let generatedText = '';
+      const fechaHoy = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      if (tipo === 'faltantes') {
+        const centrosFaltan = centrosData.filter(c => c.estado === 'faltan');
+        modalTitle.textContent = 'Notificación: Centros con Carga Pendiente';
+        modalDesc.textContent = 'Listado de centros a quienes se debe recordar completar el cupo asignado:';
+
+        generatedText = `ASUNTO: Recordatorio de Carga de Proyectos - INTA (${fechaHoy})\n\n`;
+        generatedText += `Estimados/as,\nSe informa el estado de relevamiento de proyectos institucionales.\n`;
+        generatedText += `Los siguientes centros aún registran cupos disponibles pendientes de carga:\n\n`;
+
+        centrosFaltan.forEach(c => {
+          generatedText += `• ${c.nombre}: Registrados ${c.totalCargados} de ${c.maximo} cupos (Faltan: ${c.maximo - c.totalCargados})\n`;
+        });
+
+        generatedText += `\nFavor de ingresar al formulario correspondiente y completar las propuestas antes de la fecha límite establecida.\nAtentamente,\nDirección Nacional de Asistencias e I+D`;
+      } else {
+        const centrosExcedidos = centrosData.filter(c => c.estado === 'superaron');
+        modalTitle.textContent = 'Notificación: Centros con Cupo Excedido';
+        modalDesc.textContent = 'Listado de centros que superaron el cupo máximo permitido para revisión o ajuste:';
+
+        generatedText = `ASUNTO: Revisión de Cupo Excedido de Proyectos - INTA (${fechaHoy})\n\n`;
+        generatedText += `Estimados/as,\nSe informa que en el relevamiento actual los siguientes centros han registrado un número de proyectos superior al cupo máximo asignado:\n\n`;
+
+        centrosExcedidos.forEach(c => {
+          generatedText += `• ${c.nombre}: Registrados ${c.totalCargados} de ${c.maximo} cupos asignados (Excedente: +${c.diferencia})\n`;
+        });
+
+        generatedText += `\nSe solicita contactar a los responsables de los centros para definir la priorización correspondiente o ajustar la cantidad de propuestas enviadas.\nAtentamente,\nDirección Nacional de Asistencias e I+D`;
+      }
+
+      modalTextarea.value = generatedText;
+      modal.classList.remove('hidden');
+    }
+
+    function closeNotificationModal() {
+      document.getElementById('notification-modal').classList.add('hidden');
+    }
+
+    function copyModalText() {
+      const textarea = document.getElementById('modal-textarea');
+      textarea.select();
+      document.execCommand('copy');
+      showToast('Copiado al portapapeles con éxito', '📋');
+      closeNotificationModal();
+    }
+
+    // ==========================================
+    // CONECTOR GOOGLE SHEETS EN VIVO
+    // ==========================================
+    async function syncGoogleSheets(silent = false) {
+      const spinner = document.getElementById('sync-spinner');
+      spinner.classList.add('animate-spin');
+
+      try {
+        // Consultar hoja "carga" (col A: Centro, col B: Cupo Máximo)
+        const urlCarga = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=carga`;
+        // Consultar hoja "proyectos"
+        const urlProyectos = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=proyectos`;
+
+        const [resCarga, resProy] = await Promise.all([
+          fetch(urlCarga),
+          fetch(urlProyectos)
+        ]);
+
+        if (!resCarga.ok || !resProy.ok) {
+          throw new Error('Respuesta de red no válida al consultar Google Sheets');
+        }
+
+        const textCarga = await resCarga.text();
+        const textProy = await resProy.text();
+
+        // Limpiar JSONP wrapper: /*O_o*/ google.visualization.Query.setResponse({...});
+        const jsonCarga = JSON.parse(textCarga.substring(textCarga.indexOf('{'), textCarga.lastIndexOf('}') + 1));
+        const jsonProy = JSON.parse(textProy.substring(textProy.indexOf('{'), textProy.lastIndexOf('}') + 1));
+
+        processGoogleSheetsData(jsonCarga, jsonProy);
+
+        document.getElementById('data-source-label').textContent = 'Fuente: Google Sheets en Vivo (Hojas "carga" y "proyectos")';
+        document.getElementById('last-updated-label').textContent = 'Sincronizado: ' + new Date().toLocaleTimeString('es-AR');
+        
+        if (!silent) {
+          showToast('Sincronizado con Google Sheets correctamente', '✅');
+        }
+      } catch (err) {
+        console.warn('Sincronización directa de Google Sheets (CORS o permisos):', err);
+        if (!silent) {
+          showToast('No se pudo conectar a Google Sheets directamente. Puede usar el botón "Subir .xlsx" con la planilla descargada.', '⚠️');
+        }
+      } finally {
+        spinner.classList.remove('animate-spin');
+      }
+    }
+
+    // Procesar datos crudos desde Google Sheets GViz
+    function processGoogleSheetsData(cargaJson, proyJson) {
+      const centersMap = {};
+
+      // 1. Leer hoja carga (Cupos máximos)
+      const rowsCarga = cargaJson.table.rows;
+      rowsCarga.forEach(r => {
+        const cName = r.c[0] ? String(r.c[0].v || '').trim() : '';
+        const cMax = r.c[1] ? Number(r.c[1].v) || 0 : 0;
+        if (cName) {
+          centersMap[cName] = {
+            nombre: cName,
+            maximo: cMax,
+            t1: 0,
+            t2: 0,
+            t3: 0
+          };
+        }
+      });
+
+      // 2. Leer hoja proyectos
+      const rowsProy = proyJson.table.rows;
+      const cols = proyJson.table.cols.map(c => String(c.label || '').toLowerCase());
+
+      // Identificar índices de columnas
+      let idxCentro = -1;
+      let idxTipo = -1;
+
+      cols.forEach((colName, idx) => {
+        if (colName.includes('centro')) idxCentro = idx;
+        if (colName.includes('tipo')) idxTipo = idx;
+      });
+
+      // Si no tienen label explícito, tomar col A (0) o B (1) por defecto
+      if (idxCentro === -1) idxCentro = 0;
+      if (idxTipo === -1) idxTipo = 1;
+
+      rowsProy.forEach(r => {
+        if (!r.c) return;
+        const centroVal = r.c[idxCentro] ? String(r.c[idxCentro].v || '').trim() : '';
+        const tipoVal = r.c[idxTipo] ? String(r.c[idxTipo].v || '').trim() : '';
+
+        if (!centroVal) return;
+
+        // Si el centro no estaba en la hoja de carga, crearlo con cupo 0
+        if (!centersMap[centroVal]) {
+          centersMap[centroVal] = {
+            nombre: centroVal,
+            maximo: 0,
+            t1: 0,
+            t2: 0,
+            t3: 0
+          };
+        }
+
+        // Detectar tipo de proyecto (solo Tipos I, II y III)
+        const tipoLower = tipoVal.toLowerCase();
+        if (tipoLower.includes('tipo i') || tipoLower.includes('tipo 1')) {
+          centersMap[centroVal].t1++;
+        } else if (tipoLower.includes('tipo ii') || tipoLower.includes('tipo 2')) {
+          centersMap[centroVal].t2++;
+        } else if (tipoLower.includes('tipo iii') || tipoLower.includes('tipo 3')) {
+          centersMap[centroVal].t3++;
+        }
+      });
+
+      // Convertir a array de datos y calcular
+      centrosData = Object.values(centersMap);
+      calculateMetrics();
+      renderAll();
+    }
+
+    // ==========================================
+    // LECTOR DE ARCHIVOS LOCALES (.xlsx o .csv)
+    // ==========================================
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+
+          const sheetNames = workbook.SheetNames;
+          const cargaSheetName = sheetNames.find(s => s.toLowerCase().includes('carga')) || sheetNames[0];
+          const proySheetName = sheetNames.find(s => s.toLowerCase().includes('proyecto')) || sheetNames[1] || sheetNames[0];
+
+          const cargaRows = XLSX.utils.sheet_to_json(workbook.Sheets[cargaSheetName], { header: 1 });
+          const proyRows = XLSX.utils.sheet_to_json(workbook.Sheets[proySheetName], { header: 1 });
+
+          const centersMap = {};
+
+          // Leer cupos desde la hoja carga
+          for (let i = 1; i < cargaRows.length; i++) {
+            const row = cargaRows[i];
+            if (!row || !row[0]) continue;
+            const cName = String(row[0]).trim();
+            const cMax = Number(row[1]) || 0;
+            if (cName) {
+              centersMap[cName] = {
+                nombre: cName,
+                maximo: cMax,
+                t1: 0,
+                t2: 0,
+                t3: 0
+              };
+            }
+          }
+
+          // Leer proyectos
+          for (let i = 1; i < proyRows.length; i++) {
+            const row = proyRows[i];
+            if (!row) continue;
+
+            // Buscar texto que coincida con centro y tipo
+            let centroVal = '';
+            let tipoVal = '';
+
+            for (let j = 0; j < row.length; j++) {
+              const cellStr = String(row[j] || '').trim();
+              if (cellStr.toLowerCase().includes('centro')) {
+                centroVal = cellStr;
+              }
+              if (cellStr.toLowerCase().includes('tipo')) {
+                tipoVal = cellStr;
+              }
+            }
+
+            // Si no detectó por keywords, usar columnas 0 y 1
+            if (!centroVal && row[0]) centroVal = String(row[0]).trim();
+            if (!tipoVal && row[1]) tipoVal = String(row[1]).trim();
+
+            if (!centroVal) continue;
+
+            if (!centersMap[centroVal]) {
+              centersMap[centroVal] = { nombre: centroVal, maximo: 0, t1: 0, t2: 0, t3: 0 };
+            }
+
+            const tipoLower = tipoVal.toLowerCase();
+            if (tipoLower.includes('tipo i') || tipoLower.includes('tipo 1')) centersMap[centroVal].t1++;
+            else if (tipoLower.includes('tipo ii') || tipoLower.includes('tipo 2')) centersMap[centroVal].t2++;
+            else if (tipoLower.includes('tipo iii') || tipoLower.includes('tipo 3')) centersMap[centroVal].t3++;
+          }
+
+          centrosData = Object.values(centersMap);
+          calculateMetrics();
+          renderAll();
+
+          document.getElementById('data-source-label').textContent = `Fuente: Archivo local cargado (${file.name})`;
+          document.getElementById('last-updated-label').textContent = 'Cargado: ' + new Date().toLocaleTimeString('es-AR');
+
+          showToast('Archivo Excel procesado correctamente', '📁');
+        } catch (err) {
+          console.error(err);
+          showToast('Error al leer el archivo Excel. Asegúrese del formato.', '❌');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Mensaje toast
+    function showToast(message, icon = 'ℹ️') {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-message').textContent = message;
+      document.getElementById('toast-icon').textContent = icon;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
