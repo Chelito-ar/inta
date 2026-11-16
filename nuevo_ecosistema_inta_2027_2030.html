@@ -465,6 +465,120 @@
       color: #e2e8f0;
     }
 
+    /* SECCIÓN DOCUMENTACIÓN Y DESCARGAS */
+    .docs-box {
+      background: var(--inta-card);
+      border: 1px solid var(--inta-border);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .docs-subtitle {
+      font-size: 14.5px;
+      color: var(--inta-muted);
+      margin-bottom: 18px;
+    }
+
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .doc-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--inta-bg);
+      border: 1.5px solid var(--inta-border);
+      border-radius: 12px;
+      padding: 15px 18px;
+      text-decoration: none;
+      color: var(--inta-navy);
+      transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+      box-shadow: 0 2px 6px rgba(15, 37, 55, 0.04);
+    }
+
+    .doc-btn:hover {
+      background: var(--inta-blue);
+      border-color: var(--inta-blue);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 75, 135, 0.22);
+    }
+
+    .doc-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .doc-pdf-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: #fee2e2;
+      color: var(--inta-accent-red);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .doc-btn:hover .doc-pdf-badge {
+      background: #ffffff;
+      color: var(--inta-accent-red);
+    }
+
+    .doc-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .doc-title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .doc-meta {
+      font-size: 11.5px;
+      color: var(--inta-muted);
+      transition: color 0.25s ease;
+    }
+
+    .doc-btn:hover .doc-meta {
+      color: #dbeafe;
+    }
+
+    .doc-action-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--inta-border);
+      color: var(--inta-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+
+    .doc-btn:hover .doc-action-icon {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+    }
+
     /* RESPONSIVE */
     @media (max-width: 900px) {
       .instruments-grid {
@@ -698,6 +812,87 @@
       <h3>Ningún tema relevante queda afuera</h3>
       <p>Tampoco ninguna capacidad institucional. El Director agradeció el esfuerzo de todo el personal en un contexto muy difícil y explicó el sentido de planificar ahora: llegar fortalecidos a los 70 años del INTA y estar listos para cuando el contexto mejore.</p>
     </footer>
+
+    <!-- DOCUMENTACIÓN Y DESCARGAS -->
+    <section class="docs-box">
+      <div class="section-header">
+        <div class="section-bar"></div>
+        <h2 class="section-title">Documentación de referencia</h2>
+      </div>
+      <p class="docs-subtitle">Accedé y descargá los documentos completos (se abren en una nueva pestaña):</p>
+
+      <div class="docs-grid">
+        <!-- 1. Reemplazá # por la URL de SharePoint de "Propuesta Redes INTA 2027.pdf" -->
+        <a href="#" target="_blank" rel="noopener noreferrer" class="doc-btn" title="Abrir Propuesta Redes INTA 2027.pdf en una pestaña nueva">
+          <div class="doc-btn-left">
+            <span class="doc-pdf-badge">PDF</span>
+            <div class="doc-info">
+              <span class="doc-title">Propuesta Redes INTA 2027</span>
+              <span class="doc-meta">Abrir / Descargar documento</span>
+            </div>
+          </div>
+          <span class="doc-action-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </span>
+        </a>
+
+        <!-- 2. Reemplazá # por la URL de SharePoint de "TDR Proyectos Cartera Programatica 2027-2030.pdf" -->
+        <a href="#" target="_blank" rel="noopener noreferrer" class="doc-btn" title="Abrir TDR Proyectos Cartera Programatica 2027-2030.pdf en una pestaña nueva">
+          <div class="doc-btn-left">
+            <span class="doc-pdf-badge">PDF</span>
+            <div class="doc-info">
+              <span class="doc-title">TDR Proyectos Cartera Programática 2027-2030</span>
+              <span class="doc-meta">Abrir / Descargar documento</span>
+            </div>
+          </div>
+          <span class="doc-action-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </span>
+        </a>
+
+        <!-- 3. Reemplazá # por la URL de SharePoint de "Criterios para definición de Planes de Mejoramiento INTA 2027.pdf" -->
+        <a href="#" target="_blank" rel="noopener noreferrer" class="doc-btn" title="Abrir Criterios para definición de Planes de Mejoramiento INTA 2027.pdf en una pestaña nueva">
+          <div class="doc-btn-left">
+            <span class="doc-pdf-badge">PDF</span>
+            <div class="doc-info">
+              <span class="doc-title">Criterios para definición de Planes de Mejoramiento INTA 2027</span>
+              <span class="doc-meta">Abrir / Descargar documento</span>
+            </div>
+          </div>
+          <span class="doc-action-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </span>
+        </a>
+
+        <!-- 4. Reemplazá # por la URL de SharePoint de "Propuesta Bancos Germoplasma INTA 2027.pdf" -->
+        <a href="#" target="_blank" rel="noopener noreferrer" class="doc-btn" title="Abrir Propuesta Bancos Germoplasma INTA 2027.pdf en una pestaña nueva">
+          <div class="doc-btn-left">
+            <span class="doc-pdf-badge">PDF</span>
+            <div class="doc-info">
+              <span class="doc-title">Propuesta Bancos Germoplasma INTA 2027</span>
+              <span class="doc-meta">Abrir / Descargar documento</span>
+            </div>
+          </div>
+          <span class="doc-action-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </span>
+        </a>
+
+        <!-- 5. Reemplazá # por la URL de SharePoint de "Mapa Tematico Institucional_INTA.pdf" -->
+        <a href="#" target="_blank" rel="noopener noreferrer" class="doc-btn" title="Abrir Mapa Tematico Institucional_INTA.pdf en una pestaña nueva">
+          <div class="doc-btn-left">
+            <span class="doc-pdf-badge">PDF</span>
+            <div class="doc-info">
+              <span class="doc-title">Mapa Temático Institucional INTA</span>
+              <span class="doc-meta">Abrir / Descargar documento</span>
+            </div>
+          </div>
+          <span class="doc-action-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </span>
+        </a>
+      </div>
+    </section>
   </div>
 
 </body>
