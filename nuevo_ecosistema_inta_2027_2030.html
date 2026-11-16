@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ecosistema de Trabajo INTA 2027–2030</title>
+  <style>
+    :root {
+      --inta-navy: #0f2537;
+      --inta-blue: #004b87;
+      --inta-blue-mid: #0072bc;
+      --inta-blue-light: #e8f2fa;
+      --inta-accent-red: #c82333;
+      --inta-bg: #f4f7fa;
+      --inta-card: #ffffff;
+      --inta-text: #1e293b;
+      --inta-muted: #52637a;
+      --inta-border: #dce4ee;
+      --shadow-sm: 0 2px 8px rgba(15, 37, 55, 0.06);
+      --shadow-md: 0 8px 24px rgba(15, 37, 55, 0.1);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--inta-bg);
+      color: var(--inta-text);
+      line-height: 1.5;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* HEADER / HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--inta-navy) 0%, var(--inta-blue) 65%, var(--inta-blue-mid) 100%);
+      color: #ffffff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .hero-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #ff4d5e;
+      box-shadow: 0 0 8px #ff4d5e;
+    }
+
+    .hero h1 {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 10px;
+      max-width: 820px;
+    }
+
+    .hero p {
+      font-size: 15.5px;
+      color: #dbeafe;
+      max-width: 780px;
+    }
+
+    /* SECTION TITLES */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-bar {
+      width: 5px;
+      height: 22px;
+      background: var(--inta-blue-mid);
+      border-radius: 3px;
+    }
+
+    .section-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--inta-navy);
+    }
+
+    /* COMPARATIVA: HASTA AHORA vs DESDE 2027 */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .compare-card {
+      background: var(--inta-card);
+      border-radius: var(--radius);
+      padding: 24px;
+      border: 1px solid var(--inta-border);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .compare-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .compare-card.past {
+      border-top: 4px solid #7a8fa6;
+      background: #fafbfd;
+    }
+
+    .compare-card.future {
+      border-top: 4px solid var(--inta-blue-mid);
+      background: linear-gradient(180deg, #f3f9ff 0%, #ffffff 45%);
+    }
+
+    .tag-era {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .past .tag-era {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .future .tag-era {
+      background: var(--inta-blue-mid);
+      color: #ffffff;
+    }
+
+    .compare-card h3 {
+      font-size: 20px;
+      color: var(--inta-navy);
+      margin-bottom: 8px;
+    }
+
+    .compare-card p {
+      font-size: 14.5px;
+      color: var(--inta-muted);
+    }
+
+    /* CÓMO SE CONSTRUYÓ */
+    .build-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .build-card {
+      background: var(--inta-card);
+      border: 1px solid var(--inta-border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .build-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--inta-blue-mid);
+    }
+
+    .build-metric {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--inta-blue);
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .build-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--inta-blue-light);
+      color: var(--inta-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .build-card h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--inta-navy);
+    }
+
+    .build-card p {
+      font-size: 14px;
+      color: var(--inta-muted);
+    }
+
+    /* QUÉ CAMBIA EN LOS PROYECTOS */
+    .changes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .change-item {
+      background: var(--inta-card);
+      border: 1px solid var(--inta-border);
+      border-left: 4px solid var(--inta-blue);
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .change-check {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: var(--inta-blue-light);
+      color: var(--inta-blue-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .change-item h4 {
+      font-size: 15.5px;
+      color: var(--inta-navy);
+      margin-bottom: 4px;
+    }
+
+    .change-item p {
+      font-size: 14px;
+      color: var(--inta-muted);
+    }
+
+    /* CUATRO TIPOS DE PROYECTO + QUIÉN HACE QUÉ */
+    .split-row {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+    }
+
+    .panel-box {
+      background: var(--inta-card);
+      border: 1px solid var(--inta-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .types-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    .type-card {
+      background: var(--inta-bg);
+      border: 1px solid var(--inta-border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .type-card.highlight {
+      background: #f0f7ff;
+      border-color: #b8d7f5;
+    }
+
+    .type-roman {
+      display: inline-block;
+      background: var(--inta-navy);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .type-card.highlight .type-roman {
+      background: var(--inta-blue-mid);
+    }
+
+    .type-card h4 {
+      font-size: 15px;
+      color: var(--inta-navy);
+      margin-bottom: 6px;
+    }
+
+    .type-card p {
+      font-size: 13.5px;
+      color: var(--inta-muted);
+    }
+
+    .roles-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    .role-card {
+      background: var(--inta-bg);
+      border-radius: 12px;
+      padding: 16px 18px;
+      border-left: 4px solid var(--inta-navy);
+    }
+
+    .role-card.prog {
+      border-left-color: var(--inta-accent-red);
+    }
+
+    .role-card h4 {
+      font-size: 15.5px;
+      color: var(--inta-navy);
+      margin-bottom: 4px;
+    }
+
+    .role-card p {
+      font-size: 14px;
+      color: var(--inta-muted);
+    }
+
+    /* ECOSISTEMA DE INSTRUMENTOS (8 PIEZAS) */
+    .eco-box {
+      background: var(--inta-card);
+      border: 1px solid var(--inta-border);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .eco-subtitle {
+      font-size: 14.5px;
+      color: var(--inta-muted);
+      margin-bottom: 18px;
+    }
+
+    .instruments-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .inst-card {
+      background: var(--inta-bg);
+      border: 1px solid var(--inta-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.25s ease;
+      cursor: default;
+    }
+
+    .inst-card:hover {
+      background: var(--inta-blue);
+      border-color: var(--inta-blue);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 75, 135, 0.2);
+    }
+
+    .inst-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--inta-blue);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .inst-card:hover .inst-num {
+      background: #ffffff;
+      color: var(--inta-blue);
+    }
+
+    .inst-name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    /* CIERRE / MENSAJE INSTITUCIONAL */
+    .closing-banner {
+      background: linear-gradient(90deg, var(--inta-navy) 0%, #163854 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 24px 30px;
+      border-left: 6px solid var(--inta-accent-red);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .closing-banner h3 {
+      font-size: 18px;
+      margin-bottom: 6px;
+      color: #ffffff;
+    }
+
+    .closing-banner p {
+      font-size: 14.5px;
+      color: #e2e8f0;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .instruments-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .split-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .compare-grid,
+      .build-grid,
+      .changes-grid,
+      .types-grid {
+        grid-template-columns: 1fr;
+      }
+      .instruments-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero {
+        padding: 24px 20px;
+      }
+      .hero h1 {
+        font-size: 21px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- ENCABEZADO -->
+    <header class="hero">
+      <div class="hero-badge">
+        <span class="hero-dot"></span>
+        Hoja de Ruta Institucional · 2027 – 2030
+      </div>
+      <h1>El INTA define cómo va a trabajar entre 2027 y 2030</h1>
+      <p>El Consejo Directivo encargó el proceso a principios de año y ya aprobó la propuesta.</p>
+    </header>
+
+    <!-- COMPARATIVA HASTA AHORA VS DESDE 2027 -->
+    <section>
+      <div class="section-header">
+        <div class="section-bar"></div>
+        <h2 class="section-title">Cambio de paradigma</h2>
+      </div>
+      <div class="compare-grid">
+        <article class="compare-card past">
+          <span class="tag-era">Hasta ahora</span>
+          <h3>Cultura de proyectos</h3>
+          <p><strong>"Si no está en la cartera, no existe."</strong> La regla sirvió para reconstruir el INTA en los 2000, pero hoy le quita agilidad.</p>
+        </article>
+        <article class="compare-card future">
+          <span class="tag-era">Desde 2027</span>
+          <h3>Cultura de impacto</h3>
+          <p>No alcanza con ordenar actividades: hay que mostrar <strong>resultados medibles en el territorio</strong>.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- CÓMO SE CONSTRUYÓ -->
+    <section>
+      <div class="section-header">
+        <div class="section-bar"></div>
+        <h2 class="section-title">Cómo se construyó</h2>
+      </div>
+      <div class="build-grid">
+        <article class="build-card">
+          <div class="build-metric">
+            <div class="build-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            40%
+          </div>
+          <h4>Mirada externa</h4>
+          <p>Cerca del 40% de participación de afuera del INTA: entrevistas a expertos y talleres en las cinco regiones y en los centros de investigación.</p>
+        </article>
+
+        <article class="build-card">
+          <div class="build-metric">
+            <div class="build-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            Evaluar
+          </div>
+          <h4>Primero, lo hecho</h4>
+          <p>Se evaluaron los proyectos de la cartera anterior y los planes estratégicos.</p>
+        </article>
+
+        <article class="build-card">
+          <div class="build-metric">
+            <div class="build-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            </div>
+            Mapa
+          </div>
+          <h4>De abajo hacia arriba</h4>
+          <p>En el Mapa Temático, cada unidad relevó y priorizó sus temas y capacidades.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- QUÉ CAMBIA EN LOS PROYECTOS -->
+    <section>
+      <div class="section-header">
+        <div class="section-bar"></div>
+        <h2 class="section-title">Qué cambia en los proyectos</h2>
+      </div>
+      <div class="changes-grid">
+        <div class="change-item">
+          <div class="change-check">✓</div>
+          <div>
+            <h4>Investigación y extensión juntas</h4>
+            <p>Los proyectos integran ambos sistemas y cubren las distintas etapas de la innovación.</p>
+          </div>
+        </div>
+
+        <div class="change-item">
+          <div class="change-check">✓</div>
+          <div>
+            <h4>Plazos flexibles</h4>
+            <p>Duran 2, 3 o 4 años, según lo que necesite cada propuesta.</p>
+          </div>
+        </div>
+
+        <div class="change-item">
+          <div class="change-check">✓</div>
+          <div>
+            <h4>Coordinar no cambia el nivel</h4>
+            <p>La coordinación no implica una asignación de nivel asociada al cargo.</p>
+          </div>
+        </div>
+
+        <div class="change-item">
+          <div class="change-check">✓</div>
+          <div>
+            <h4>Teoría del Cambio</h4>
+            <p>Se define el camino de pasos concretos hacia el resultado buscado y se anticipan los riesgos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUATRO TIPOS DE PROYECTO & QUIÉN HACE QUÉ -->
+    <section class="split-row">
+      <div class="panel-box">
+        <div class="section-header">
+          <div class="section-bar"></div>
+          <h2 class="section-title">Cuatro tipos de proyecto</h2>
+        </div>
+        <div class="types-grid">
+          <div class="type-card">
+            <span class="type-roman">I - II - III</span>
+            <h4>Se definen en cada centro</h4>
+            <p>Ajustados a las necesidades del territorio. Los evalúan la Dirección Nacional y los programas nacionales.</p>
+          </div>
+          <div class="type-card highlight">
+            <span class="type-roman">IV</span>
+            <h4>Nacionales y transversales</h4>
+            <p>Abordan los 14 o 15 grandes temas estratégicos del INTA, que hoy evalúa el Consejo Directivo.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-box">
+        <div class="section-header">
+          <div class="section-bar"></div>
+          <h2 class="section-title">Quién hace qué</h2>
+        </div>
+        <div class="roles-list">
+          <div class="role-card">
+            <h4>Línea dirigencial</h4>
+            <p>Gestiona los proyectos.</p>
+          </div>
+          <div class="role-card prog">
+            <h4>Programas nacionales</h4>
+            <p>Orientan temáticamente, monitorean y evalúan.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LA CARTERA NO ES TODO: ECOSISTEMA DE INSTRUMENTOS -->
+    <section class="eco-box">
+      <div class="section-header">
+        <div class="section-bar"></div>
+        <h2 class="section-title">La cartera no es todo</h2>
+      </div>
+      <p class="eco-subtitle">Es una de las <strong>ocho piezas del Ecosistema de Instrumentos</strong>. Cada centro y unidad elige con qué instrumento aborda cada tema.</p>
+
+      <div class="instruments-grid">
+        <div class="inst-card">
+          <div class="inst-num">1</div>
+          <div class="inst-name">Cartera programática</div>
+        </div>
+        <div class="inst-card">
+          <div class="inst-num">2</div>
+          <div class="inst-name">Convenios</div>
+        </div>
+        <div class="inst-card">
+          <div class="inst-num">3</div>
+          <div class="inst-name">Servicios</div>
+        </div>
+        <div class="inst-card">
+          <div class="inst-num">4</div>
+          <div class="inst-name">Proyectos extrapresupuestarios</div>
+        </div>
+        <div class="inst-card">
+          <div class="inst-num">5</div>
+          <div class="inst-name">Planes de mejoramiento</div>
+        </div>
+        <div class="inst-card">
+          <div class="inst-num">6</div>
+          <div class="inst-name">Bancos de germoplasma</div>
+        </div>
+        <div class="inst-card">
+          <div class="inst-num">7</div>
+          <div class="inst-name">Redes</div>
+        </div>
+        <div class="inst-card">
+          <div class="inst-num">8</div>
+          <div class="inst-name">Nodos de innovación</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CIERRE INSTITUCIONAL -->
+    <footer class="closing-banner">
+      <h3>Ningún tema relevante queda afuera</h3>
+      <p>Tampoco ninguna capacidad institucional. El Director agradeció el esfuerzo de todo el personal en un contexto muy difícil y explicó el sentido de planificar ahora: llegar fortalecidos a los 70 años del INTA y estar listos para cuando el contexto mejore.</p>
+    </footer>
+  </div>
+
+</body>
+</html>
