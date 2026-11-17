@@ -465,6 +465,47 @@
       color: #e2e8f0;
     }
 
+    /* PREGUNTAS Y RESPUESTAS */
+    .faq-box {
+      background: var(--inta-card);
+      border: 1px solid var(--inta-border);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 6px;
+    }
+
+    .faq-item {
+      background: var(--inta-bg);
+      border: 1px solid var(--inta-border);
+      border-left: 4px solid var(--inta-blue-mid);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .faq-item h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--inta-navy);
+      margin-bottom: 8px;
+    }
+
+    .faq-item p {
+      font-size: 14px;
+      color: var(--inta-muted);
+      margin-bottom: 8px;
+    }
+
+    .faq-item p:last-child {
+      margin-bottom: 0;
+    }
+
     /* SECCIÓN DOCUMENTACIÓN Y DESCARGAS */
     .docs-box {
       background: var(--inta-card);
@@ -617,7 +658,7 @@
         <span class="hero-dot"></span>
         Hoja de Ruta Institucional · 2027 – 2030
       </div>
-      <h1>El INTA define cómo va a trabajar entre 2027 y 2030</h1>
+      <h1>El INTA define cómo va a abordar su accionar para el período 2027 - 2030</h1>
       <p>El Consejo Directivo encargó el proceso a principios de año y ya aprobó la propuesta.</p>
     </header>
 
@@ -701,6 +742,22 @@
         <div class="change-item">
           <div class="change-check">✓</div>
           <div>
+            <h4>Focalizados en acciones concretas</h4>
+            <p>Que puedan ser medibles en sus resultados o impacto.</p>
+          </div>
+        </div>
+
+        <div class="change-item">
+          <div class="change-check">✓</div>
+          <div>
+            <h4>Proceso previo de priorización</h4>
+            <p>Los proyectos requieren de un proceso previo de priorización.</p>
+          </div>
+        </div>
+
+        <div class="change-item">
+          <div class="change-check">✓</div>
+          <div>
             <h4>Plazos flexibles</h4>
             <p>Duran 2, 3 o 4 años, según lo que necesite cada propuesta.</p>
           </div>
@@ -748,7 +805,7 @@
       <div class="panel-box">
         <div class="section-header">
           <div class="section-bar"></div>
-          <h2 class="section-title">Quién hace qué</h2>
+          <h2 class="section-title">Quién hace qué cuando estén en ejecución</h2>
         </div>
         <div class="roles-list">
           <div class="role-card">
@@ -810,8 +867,29 @@
     <!-- CIERRE INSTITUCIONAL -->
     <footer class="closing-banner">
       <h3>Ningún tema relevante queda afuera</h3>
-      <p>Tampoco ninguna capacidad institucional. El Director agradeció el esfuerzo de todo el personal en un contexto muy difícil y explicó el sentido de planificar ahora: llegar fortalecidos a los 70 años del INTA y estar listos para cuando el contexto mejore.</p>
+      <p>Tampoco ninguna capacidad institucional. El Director Nacional agradece el esfuerzo de todo el personal en un contexto muy difícil. Hay que planificar ahora para llegar fortalecidos a los 70 años del INTA y estar listos para cuando el contexto mejore.</p>
     </footer>
+
+    <!-- PREGUNTAS Y RESPUESTAS -->
+    <section class="faq-box">
+      <div class="section-header">
+        <div class="section-bar"></div>
+        <h2 class="section-title">Preguntas y respuestas</h2>
+      </div>
+      <div class="faq-list">
+        <article class="faq-item">
+          <h3>¿En cuántos proyectos se podrá participar?</h3>
+          <p>No hay un cupo de proyectos por persona. Los proyectos abordan temáticas que no se solapan, por lo que no se considera necesario fijar un tope.</p>
+        </article>
+
+        <article class="faq-item">
+          <h3>¿Cómo estará confeccionado el presupuesto? ¿Tendremos Inciso 4?</h3>
+          <p>Para la distribución presupuestaria de los proyectos tipos I, II y III se tomó como referencia la ejecución correspondiente al año 2024 de un Proyecto Estructural (PE) regional y de un Proyecto Estructural/Proyecto de Desarrollo (PE/PD) de Centro de Investigación (CI) de la cartera vigente.</p>
+          <p>Para los proyectos tipo IV se consideró como referencia la ejecución 2024 de proyectos PE/PD de carácter interprogramático e interinstitucional, por tratarse de iniciativas de alcance nacional, mayor complejidad operativa y vinculadas a los Programas Nacionales.</p>
+          <p><strong>El presupuesto de los proyectos contempla solamente componentes de los incisos 2 y 3.</strong></p>
+        </article>
+      </div>
+    </section>
 
     <!-- DOCUMENTACIÓN Y DESCARGAS -->
     <section class="docs-box">
@@ -819,9 +897,9 @@
         <div class="section-bar"></div>
         <h2 class="section-title">Documentación de referencia</h2>
       </div>
-      <p class="docs-subtitle">Accedé y descargá los documentos completos (se abrirán en una pestaña nueva):</p>
+      <p class="docs-subtitle">Accedé y descargá los documentos completos (se abren en una nueva pestaña):</p>
 
-      <div class="docs-grid">
+     <div class="docs-grid">
         <!-- 1. Reemplazá # por la URL de SharePoint de "Propuesta Redes INTA 2027.pdf" -->
         <a href="https://intaarg.sharepoint.com/:b:/s/DNAID/IQDYKpIH2dycTaa9YYZkHme5AXN0tzCuNUvJkmjnTgcPhdg?e=uhKgcm" target="_blank" rel="noopener noreferrer" class="doc-btn" title="Abrir Propuesta Redes INTA 2027.pdf en una pestaña nueva">
           <div class="doc-btn-left">
